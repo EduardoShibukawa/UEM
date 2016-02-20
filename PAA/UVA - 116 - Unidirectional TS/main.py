@@ -11,6 +11,7 @@ class TSPU:
         self.caminhominimo = (-1, INFINITO)
 
     def gerarmatriz(self, nome_arquivo):
+        with open(nome_arquivo) as arquivo:
             linha = arquivo.readline()
             header = linha.split(" ")
             self.numerolinhas = int(header[0])
