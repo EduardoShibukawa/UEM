@@ -1,92 +1,51 @@
-import sys
-from operator import itemgetter
+import os
+import re
+import time
 
-INFINITO = sys.maxsize
-class TSPU:
-    def __init__(self):
-        self.matriz = []
-        self.numerolinhas = 0
-        self.numerocolunas = 0
-        self.memo = []
-        self.caminhominimo = (-1, INFINITO)
+from TSPU import TSPU
 
-    def gerarmatriz(self, nome_arquivo):
-        with open(nome_arquivo) as arquivo:
-            linha = arquivo.readline()
-            header = linha.split(" ")
-            self.numerolinhas = int(header[0])
-            self.numerocolunas = int(header[1])
-            for n in range(0, self.numerolinhas):
-                linha = arquivo.readline()
-                linha = linha.split(" ")
 
-                linha_tsp = []
-                for m in range(0, self.numerocolunas):
-                    linha_tsp.append(int(linha[m]))
-                self.matriz.append(linha_tsp)
+def atoi(text):
+    return int(text) if text.isdigit() else text
 
-    def __getindicelinhavalido(self, indice_linha):
-        if indice_linha == -1:
-            return self.numerolinhas - 1
-        else:
-            return indice_linha % self.numerolinhas
 
-    def __buscarcaminhominimo(self, indice_linha, indice_coluna):
-        if indice_coluna == 0:
-            self.memo[indice_linha][indice_coluna] = (-1, self.matriz[indice_linha][indice_coluna])
-        else:
-            if self.memo[indice_linha][indice_coluna] == INFINITO:
-                possiveiscaminhos = [
-                    (
-                        self.__getindicelinhavalido(indice_linha - 1),
-                        self.__buscarcaminhominimo(self.__getindicelinhavalido(indice_linha - 1), indice_coluna - 1)
-                    ),
-                    (
-                        self.__getindicelinhavalido(indice_linha + 1),
-                        self.__buscarcaminhominimo(self.__getindicelinhavalido(indice_linha + 1), indice_coluna - 1)
-                    ),
-                    (
-                        indice_linha,
-                        self.__buscarcaminhominimo(self.__getindicelinhavalido(indice_linha), indice_coluna - 1)
-                    )
-                ]
+def natural_keys(text):
+    """
+    :param text:
+        list.sort(key=natural_keys) sorts in human order
+        http://nedbatchelder.com/blog/200712/human_sorting.html
+        (See Toothy's implementation in the comments)
+    """
+    return [atoi(c) for c in re.split('(\d+)', text)]
 
-                caminhominimo = min(possiveiscaminhos, key=itemgetter(1))
-                self.memo[indice_linha][indice_coluna] = (
-                    caminhominimo[0],
-                    self.matriz[indice_linha][indice_coluna] + caminhominimo[1]
-                )
-        return self.memo[indice_linha][indice_coluna][1]
-
-    def gerarcaminhominimo(self):
-        for indice_linha in range(0, self.numerolinhas):
-            self.memo.append([])
-            for indice_coluna in range(0, self.numerocolunas):
-                self.memo[indice_linha].append(INFINITO)
-
-        for indice_linha in range(0, self.numerolinhas):
-            custo = self.__buscarcaminhominimo(indice_linha, self.numerocolunas -1)
-            if (custo < self.caminhominimo[1]):
-                self.caminhominimo = self.memo[indice_linha][indice_coluna]
-
-    def printcaminhominimo(self):
-        caminho = []
-        indice_coluna = self.numerocolunas - 1
-        indice_linha = self.caminhominimo[0]
-        while indice_coluna != -1:
-            indice_linha = self.memo[indice_linha][indice_coluna][0]
-            if indice_linha != -1:
-              caminho.append(indice_linha + 1)
-            indice_coluna -= 1
-        print(' '.join(str(e) for e in caminho[::-1]))
-        print(self.caminhominimo[1])
 
 def main():
-    nome_arquivo = 'E:\\Duh\\UEM\\PAA\\tsp\\in\\tsp16.txt'
-    tspu = TSPU()
-    tspu.gerarmatriz(nome_arquivo)
-    tspu.gerarcaminhominimo()
-    tspu.printcaminhominimo()
+    """
+      Execução dos arquivos da past .//in//*.txt
+    """
+    for file in sorted(os.listdir(".//in"), key=natural_keys):
+        if file.endswith(".txt"):
+            try:
+                arquivo_saida_esperada = open('.//out//{name}'.format(name=file), 'r')
+                tspu = TSPU()
+                ini = time.time()
+                tspu.gerar_matriz('.//in//{name}'.format(name=file))
+                tspu.gerar_caminho_minimo()
+                fim = time.time()
+                print('------------------------')
+                print('Arquivo: {arquivo}\nTempo Exec: {tempo}'.format(
+                    arquivo=file,
+                    tempo=fim-ini
+                ))
+                print('---------SAIDA----------')
+                print(tspu.output_caminho_minimo())
+                print('---------ESPERADO-------')
+                print(arquivo_saida_esperada.read().strip())
+            except Exception as exception:
+                print(exception)
+
+    print('Pressione qualquer tecla para sair.')
+    input()
 
 if __name__ == '__main__':
     main()
