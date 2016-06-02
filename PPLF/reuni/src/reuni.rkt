@@ -1,0 +1,294 @@
+#lang racket
+
+(require rackunit)
+(require rackunit/text-ui)
+
+;; Este programa encontra horários disponíveis que sejam comuns entre vários
+;; horários especificados e que tenham um tamanho mínimo especificado.
+;;
+;; ** Conceitos **
+;;  Horário
+;;    Um momento no tempo, definido em termos da hora e minutos
+;;  Intervalo (abreviado inter)
+;;    Um intervalo no tempo, tem um horário de início e um horário de fim
+;;  Disponibilidade do dia (abreviado dispo)
+;;    Uma lista de intervalos que estão disponíveis em um determinado dia
+;;  Disponibilidade semanal (abreviado dispo-semana)
+;;    Uma lista com as disponibilidades de cada dia
+;;  Lista de associações
+;;    Uma lista de pares. Um par é uma lista com dois elementos. O primeiro
+;;    elemento do par é chamado de chave e o segundo elemento é chamado de
+;;    valor. Uma lista de associações é uma maneira simples de implementar uma
+;;    tabela associativa (dicionário).  Ex: o dicionário
+;;    1 -> 4, 20 -> 12, 6 -> 70, pode ser representado pela lista associativa
+;;    (list (list 1 4) (list 20 12) (list 6 70)).
+;;    A função assoc é utilizada para consultar uma lista associativa.
+;;
+;; ** Formatação de entrada e saída **
+;; Toda operação de entrada e saída deve ser feita respeitando essas
+;; formatações. A sua implementação não precisa validar as entradas. Para os
+;; testes automatizados as entradas sempre serão válidas.
+;;
+;;  Horário (HH:MM) (sempre 5 dígitos)
+;;  Exemplos
+;;     08:30 =  8 horas e 30 minutos
+;;     12:07 = 12 horas e  7 minutos
+;;
+;;  Intervalo (HH:MM-HH:MM) (sempre 11 dígitos)
+;;  Exemplos
+;;     08:30-12:07 = o intervalo tem início às 8 horas e 30 minutos e tem
+;;                   o fim às 12 horas e 7 minutos
+;;
+;;  Dias da semana
+;;    Representados por strings de tamanho 3: dom seg ter qua qui sex sab
+;;
+;;  Disponibilidade semanal
+;;    Uma sequência de linhas. Cada linha contém o dia e a lista de
+;;    intervalos disponíveis naquele dia
+;;  Exemplo
+;;    ter 10:20-12:00 16:10-17:30
+;;    sex 08:30-11:30
+;;  Observe que nem todos os dias devem estar especificados. Os dias
+;;  que não têm disponibilidades não devem ser especificados.
+
+
+;; exporta as funções que podem ser utilizadas em outros arquivos
+(provide horario
+         intervalo
+         intervalo-vazio
+         intervalo-vazio?
+         intervalo-intersecao
+         encontrar-dispo-em-comum
+         encontrar-dispo-semana-em-comum
+         main)
+
+(struct horario (h m) #:transparent)
+;; Horário representa um momento no tempo, definido em termos da hora e minutos
+;;    h : Número - horas
+;;    m : Número - minutos
+
+(struct intervalo (inicio fim) #:transparent)
+;; Intervalo representa um intervalo no tempo, tem um horário de início e um
+;; horário de fim
+;;    inicio : Horário - horário de início
+;;       fim : Horário - horário de fim
+
+;; Constante que define um intervalo vazio
+(define intervalo-vazio (void))
+
+;; Horario -> Número
+;; Retorna os minutos de umm tempo
+(define minutos-tests
+  (test-suite
+   "minutos tests"
+   (check-equal? (minutos (horario 00 00)) 0)
+   (check-equal? (minutos (horario 01 00)) 60)
+   (check-equal? (minutos (horario 08 00)) 480)
+   (check-equal? (minutos (horario 07 59)) 479)
+   (check-equal? (minutos (horario 08 20)) 500)))
+
+(define (minutos h)
+  (+ (* (horario-h h) 60) (horario-m h)))
+
+;; Número -> Horario
+;; Retorna o tempo dos minutos
+(define tempo-tests
+  (test-suite
+   "tempo tests"
+   (check-equal? (tempo 0) (horario 00 00))
+   (check-equal? (tempo 60) (horario 01 00))
+   (check-equal? (tempo 480) (horario 08 00))
+   (check-equal? (tempo 479) (horario 07 59))
+   (check-equal? (tempo 500) (horario 08 20))))
+
+(define (tempo m)
+  (horario (quotient m 60) (remainder m 60)))
+
+;; Intervalo -> bool
+;; Retorna #t se inter representa o intervalo vazio, #f caso contrário
+(define (intervalo-vazio? inter)
+  (equal? inter intervalo-vazio))
+
+;; Intervalo -> Horario
+;; Retorna o tempo do intervalo
+(define intervalo-tempo-tests
+  (test-suite
+   "intervalo tempo tests"
+   (check-equal? (intervalo-tempo (intervalo (horario 00 00) (horario 00 00))) (horario 00 00))
+   (check-equal? (intervalo-tempo (intervalo (horario 01 00) (horario 01 00))) (horario 00 00))
+   (check-equal? (intervalo-tempo (intervalo (horario 08 50) (horario 10 00))) (horario 01 10))
+   (check-equal? (intervalo-tempo (intervalo (horario 08 49) (horario 10 00))) (horario 01 11))
+   (check-equal? (intervalo-tempo (intervalo (horario 08 50) (horario 09 59))) (horario 01 09))
+   (check-equal? (intervalo-tempo (intervalo (horario 08 00) (horario 10 00))) (horario 02 00))))
+
+(define (intervalo-tempo i)
+  (tempo
+   (- (minutos (intervalo-fim i)) (minutos (intervalo-inicio i)))))
+
+;; Intervalo, Intervalo -> Intervalo
+;; Calcula a interseção entre os intervalos a e b
+(define intervalo-intersecao-tests
+  (test-suite
+   "intervalo intersecao tests"
+   (check-equal? (intervalo-intersecao
+                  (intervalo (horario 00 00) (horario 00 00))
+                  (intervalo (horario 00 00) (horario 00 00)))
+                 (intervalo (horario 00 00) (horario 00 00)))
+   (check-equal? (intervalo-intersecao
+                  (intervalo (horario 01 00) (horario 10 00))
+                  (intervalo (horario 12 00) (horario 14 00)))
+                 intervalo-vazio)
+   (check-equal? (intervalo-intersecao
+                  (intervalo (horario 12 00) (horario 14 00))
+                  (intervalo (horario 01 00) (horario 10 00)))
+                 intervalo-vazio)
+   (check-equal? (intervalo-intersecao
+                  (intervalo (horario 12 00) (horario 14 00))
+                  (intervalo (horario 15 00) (horario 16 00)))
+                 intervalo-vazio)
+   (check-equal? (intervalo-intersecao
+                  (intervalo (horario 08 10) (horario 10 30))
+                  (intervalo (horario 10 00) (horario 10 29)))
+                 (intervalo (horario 10 00) (horario 10 29)))))
+
+(define (intervalo-intersecao a b)
+  (let ([a-inicio (intervalo-inicio a)]
+        [a-fim (intervalo-fim a)]
+        [b-inicio (intervalo-inicio b)]
+        [b-fim (intervalo-fim b)])
+    (let ([a-inicio-minutos (minutos a-inicio)]
+          [a-fim-minutos (minutos a-fim)]
+          [b-inicio-minutos (minutos b-inicio)]
+          [b-fim-minutos (minutos b-fim)])
+      (cond
+        [(and (< a-inicio-minutos b-inicio-minutos)
+              (< a-fim-minutos b-inicio-minutos)) intervalo-vazio]
+        [(and (< b-inicio-minutos a-fim-minutos)
+              (< b-fim-minutos a-inicio-minutos)) intervalo-vazio]
+        [else
+         (intervalo
+          (if (> (minutos a-inicio) (minutos b-inicio))
+              a-inicio
+              b-inicio)
+          (if (< (minutos a-fim) (minutos b-fim))
+              a-fim
+              b-fim))]))))
+
+;; list Intervalo, list Intervalo -> list Intervalo
+;; Encontra a interseção dos intervalos de list-i-a e list-i-b.
+(define (encontrar-dispo-em-comum dispo-a dispo-b)
+  (define (iter d dispo)
+    (if (empty? dispo)
+        empty
+        (append
+         (let ([intersecao (intervalo-intersecao d (first dispo))])
+           (if (equal? intersecao intervalo-vazio)
+               empty
+               (list intersecao)))
+         (iter d (rest dispo)))))
+  (cond
+    [(empty? dispo-a) empty]
+    [(empty? dispo-b) empty]
+    [else (append
+           (iter (first dispo-a) dispo-b)
+           (encontrar-dispo-em-comum (rest dispo-a) dispo-b))]))
+
+;; Horário, list dispo-semana -> dispo-semana
+;; Esta função encontra os intervalos disponíveis para cada dia da semana que
+;; sejam maiores que tempo e que sejam comuns a todas as disponibilidades
+;; da lista dispos.
+;;
+;; dispo-semana é uma lista de associações entre um dia (string) e a
+;; disponibilidade naquele dia. Veja a definição de lista de associações no
+;; início deste arquivo.
+;;
+;; Por exemplo, a disponibilidade semanal (dispo-semana):
+;; ter 10:20-12:00 16:10-17:30
+;; sex 08:30-11:30g
+;; é representada da seguinte maneira:
+;; (list (list "ter" (list (intervalo (hora 10 20) (hora 12 00))
+;;                         (intervalo (hora 16 10) (hora 17 30))))
+;;       (list "sex" (list (intervalo (hora 08 30) (hora 11 30)))))
+;;
+;; Observe que esta função recebe como parâmetro uma lista de disponibilidades
+;; semanais, o exemplo acima refere-se a apenas uma disponibilidade semanal.
+;; Veja os testes de unidade para exemplos de entrada e saída desta função
+;; list dispo-semana  list dispo-semana  -> list dispo-semana
+(define (gambis dispo-a dispo-b)
+  (define (iter d l-dispo)
+    (if (null? l-dispo)
+        empty
+        (let ([dia-a (car d)]
+              [intervalos-a (cadr d)]
+              [b (assoc (car d) l-dispo)])
+          ( if (not (pair? b))
+               empty
+               (list dia-a (encontrar-dispo-em-comum intervalos-a (cadr b)))))))
+        (cond
+          [(empty? dispo-a) empty]
+          [(empty? dispo-b) empty]
+          [else (append
+                 (list (iter (car dispo-a) dispo-b))
+                 (gambis (cdr dispo-a) dispo-b))]))
+    
+    (define (encontrar-dispo-semana-em-comum tempo dispos)  
+      (cond
+        [(empty? dispos) empty]
+        [(empty? (rest dispos)) empty]
+        [else (append
+               (gambis (first dispos) (first (rest dispos)))
+               (encontrar-dispo-semana-em-comum tempo (rest dispos)))]))
+    ;; list string -> void
+    ;; Esta é a função principal. Esta função é chamada a partir do arquivo
+    ;; reuni-main.rkt
+    ;;
+    ;; args é a lista de parâmetros para o programa.
+    ;;
+    ;; O primeiro parâmetro é o tempo mínimo (string) que os intervalos em comum
+    ;; devem ter. O tempo mínimo é especificado usando a formatação de horário.
+    ;;
+    ;; O restante dos parâmetros são nomes de arquivos. Cada arquivo de entrada
+    ;; contêm uma disponibilidade semanal. Veja exemplos de arquivos no diretórios
+    ;; testes.
+    ;;
+    ;; A saída desta função é a escrita na tela dos intervalos em comum que
+    ;; foram encontrados. O formato da saída deve ser o mesmo da disponibilidade
+    ;; semanal.
+    (define (main args)
+      (error "Não implementado"))
+    
+    ;;Test ... -> Void
+    ;;Execute um conjunto de testes.
+    (define (executa-testes . testes)
+      (run-tests (test-suite "Todos os testes" testes))
+      (void))
+    
+    ;;Chama a função para executar os testes.;
+    (executa-testes minutos-tests)
+    (executa-testes tempo-tests)
+    (executa-testes intervalo-tempo-tests)
+    (executa-testes intervalo-intersecao-tests)
+    
+    (define dispo-semana-a
+      (list (list "seg" (list (intervalo (horario 08 30) (horario 10 30))
+                              (intervalo (horario 14 03) (horario 16 00))
+                              (intervalo (horario 17 10) (horario 18 10))))
+            (list "ter" (list (intervalo (horario 13 30) (horario 15 45))))
+            (list "qua" (list (intervalo (horario 11 27) (horario 13 00))
+                              (intervalo (horario 15 00) (horario 19 00))))
+            (list "sex" (list (intervalo (horario 07 30) (horario 11 30))
+                              (intervalo (horario 13 30) (horario 14 00))
+                              (intervalo (horario 15 02) (horario 16 00))
+                              (intervalo (horario 17 20) (horario 18 30))))))
+    
+    (define dispo-semana-b
+      (list (list "seg" (list (intervalo (horario 14 35) (horario 17 58))))
+            (list "ter" (list (intervalo (horario 08 40) (horario 10 30))
+                              (intervalo (horario 13 31) (horario 15 13))))
+            (list "qui" (list (intervalo (horario 08 30) (horario 15 30))))
+            (list "sex" (list (intervalo (horario 14 07) (horario 15 00))
+                              (intervalo (horario 16 00) (horario 17 30))
+                              (intervalo (horario 19 00) (horario 22 00))))))
+    
+    (define dispo-semana-a-b
+      (list dispo-semana-a dispo-semana-b))
