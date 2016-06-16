@@ -78,29 +78,11 @@
 
 ;; Horario -> Número
 ;; Retorna os minutos de umm tempo
-(define minutos-tests
-  (test-suite
-   "minutos tests"
-   (check-equal? (minutos (horario 00 00)) 0)
-   (check-equal? (minutos (horario 01 00)) 60)
-   (check-equal? (minutos (horario 08 00)) 480)
-   (check-equal? (minutos (horario 07 59)) 479)
-   (check-equal? (minutos (horario 08 20)) 500)))
-
 (define (minutos h)
   (+ (* (horario-h h) 60) (horario-m h)))
 
 ;; Número -> Horario
 ;; Retorna o tempo dos minutos
-(define tempo-tests
-  (test-suite
-   "tempo tests"
-   (check-equal? (tempo 0) (horario 00 00))
-   (check-equal? (tempo 60) (horario 01 00))
-   (check-equal? (tempo 480) (horario 08 00))
-   (check-equal? (tempo 479) (horario 07 59))
-   (check-equal? (tempo 500) (horario 08 20))))
-
 (define (tempo m)
   (horario (quotient m 60) (remainder m 60)))
 
@@ -111,46 +93,12 @@
 
 ;; Intervalo -> Horario
 ;; Retorna o tempo do intervalo
-(define intervalo-tempo-tests
-  (test-suite
-   "intervalo tempo tests"
-   (check-equal? (intervalo-tempo (intervalo (horario 00 00) (horario 00 00))) (horario 00 00))
-   (check-equal? (intervalo-tempo (intervalo (horario 01 00) (horario 01 00))) (horario 00 00))
-   (check-equal? (intervalo-tempo (intervalo (horario 08 50) (horario 10 00))) (horario 01 10))
-   (check-equal? (intervalo-tempo (intervalo (horario 08 49) (horario 10 00))) (horario 01 11))
-   (check-equal? (intervalo-tempo (intervalo (horario 08 50) (horario 09 59))) (horario 01 09))
-   (check-equal? (intervalo-tempo (intervalo (horario 08 00) (horario 10 00))) (horario 02 00))))
-
 (define (intervalo-tempo i)
   (tempo
    (- (minutos (intervalo-fim i)) (minutos (intervalo-inicio i)))))
 
 ;; Intervalo, Intervalo -> Intervalo
 ;; Calcula a interseção entre os intervalos a e b
-(define intervalo-intersecao-tests
-  (test-suite
-   "intervalo intersecao tests"
-   (check-equal? (intervalo-intersecao
-                  (intervalo (horario 00 00) (horario 00 00))
-                  (intervalo (horario 00 00) (horario 00 00)))
-                 (intervalo (horario 00 00) (horario 00 00)))
-   (check-equal? (intervalo-intersecao
-                  (intervalo (horario 01 00) (horario 10 00))
-                  (intervalo (horario 12 00) (horario 14 00)))
-                 intervalo-vazio)
-   (check-equal? (intervalo-intersecao
-                  (intervalo (horario 12 00) (horario 14 00))
-                  (intervalo (horario 01 00) (horario 10 00)))
-                 intervalo-vazio)
-   (check-equal? (intervalo-intersecao
-                  (intervalo (horario 12 00) (horario 14 00))
-                  (intervalo (horario 15 00) (horario 16 00)))
-                 intervalo-vazio)
-   (check-equal? (intervalo-intersecao
-                  (intervalo (horario 08 10) (horario 10 30))
-                  (intervalo (horario 10 00) (horario 10 29)))
-                 (intervalo (horario 10 00) (horario 10 29)))))
-
 (define (intervalo-intersecao a b)
   (let ([a-inicio (intervalo-inicio a)]
         [a-fim (intervalo-fim a)]
@@ -272,7 +220,7 @@
     (cond
       [(empty? lst) empty]
       [else (append
-             (list (string->horario (first lst)))
+             (list (string->intervalo (first lst)))
              (iter (rest lst)))]))
   (iter (string-split s)))
 
@@ -296,6 +244,43 @@
            (list (string->dispo-semana (file->string (first a))))
            (args->list-dispo (rest a)))]))
 
+(define (inteiro->string-formatada i)
+  (cond
+    [(< i 10) (string-append "0" (number->string i))]
+    [else (number->string i)]))
+
+(define (horario->string h)
+  (string-append (inteiro->string-formatada (horario-h h))
+                 ":"
+                 (inteiro->string-formatada (horario-m h))))
+
+(define (intervalo->string i)
+  (string-append (horario->string (intervalo-inicio i))
+                 "-"
+                 (horario->string (intervalo-fim i))))
+
+(define (list-intervalo->string lst)
+  (define (iter lst)
+    (cond
+      [(empty? lst) ""]
+      [else (string-append  " "
+                            (intervalo->string (first lst))                          
+                            (iter (rest lst)))]))
+  (iter lst))
+
+(define (dispo->string d)  
+  (string-append (first d)
+                 (list-intervalo->string (first (rest d)))))
+
+(define (dispo-semana->string ds)
+  (define (iter lst)
+    (cond
+      [(empty? lst) ""]
+      [else (string-append             
+             (dispo->string (first lst))
+             "\n"
+             (iter (rest lst)))]))
+  (iter ds))
+
 (define (main args)
-  (encontrar-dispo-semana-em-comum (string->horario (first args)) (args->list-dispo (rest args))))
-  
+  (display (dispo-semana->string (encontrar-dispo-semana-em-comum (string->horario (first args)) (args->list-dispo (rest args))))))
