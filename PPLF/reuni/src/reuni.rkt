@@ -176,22 +176,27 @@
 
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de list-i-a e list-i-b.
-(define (encontrar-dispo-em-comum dispo-a dispo-b)
-  (define (iter d dispo)
-    (if (empty? dispo)
-        empty
-        (append
-         (let ([intersecao (intervalo-intersecao d (first dispo))])
-           (if (equal? intersecao intervalo-vazio)
-               empty
-               (list intersecao)))
-         (iter d (rest dispo)))))
+(define (encontrar-dispo-em-comum dispo-a dispo-b tempo)
+  (define (encontrar-dispo-recursivo dispo-a dispo-b)
+    (define (iter d dispo)
+      (if (empty? dispo)
+          empty
+          (append
+           (let ([intersecao (intervalo-intersecao d (first dispo))])
+             (cond
+               [(equal? intersecao intervalo-vazio) empty]                             
+               [else (list intersecao)]))
+           (iter d (rest dispo)))))
+    (cond
+      [(empty? dispo-a) empty]
+      [(empty? dispo-b) empty]
+      [else (append
+             (iter (first dispo-a) dispo-b)
+             (encontrar-dispo-recursivo (rest dispo-a) dispo-b))]))
   (cond
-    [(empty? dispo-a) empty]
-    [(empty? dispo-b) empty]
-    [else (append
-           (iter (first dispo-a) dispo-b)
-           (encontrar-dispo-em-comum (rest dispo-a) dispo-b))]))
+    [(empty? dispo-a) dispo-b]
+    [(empty? dispo-b) dispo-a]
+    [else (filter (lambda (i) (>= (minutos (intervalo-tempo i)) (minutos tempo))) (encontrar-dispo-recursivo dispo-a dispo-b))]))
 
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
@@ -214,7 +219,7 @@
 ;; semanais, o exemplo acima refere-se a apenas uma disponibilidade semanal.
 ;; Veja os testes de unidade para exemplos de entrada e saída desta função
 ;; list dispo-semana  list dispo-semana  -> list dispo-semana
-(define (gambis dispo-a dispo-b)
+(define (encontrar-dispo-a-b dispo-a dispo-b tempo)
   (define (iter d l-dispo)
     (if (null? l-dispo)
         empty
@@ -223,72 +228,74 @@
               [b (assoc (car d) l-dispo)])
           ( if (not (pair? b))
                empty
-               (list dia-a (encontrar-dispo-em-comum intervalos-a (cadr b)))))))
-        (cond
-          [(empty? dispo-a) empty]
-          [(empty? dispo-b) empty]
-          [else (append
-                 (list (iter (car dispo-a) dispo-b))
-                 (gambis (cdr dispo-a) dispo-b))]))
-    
-    (define (encontrar-dispo-semana-em-comum tempo dispos)  
-      (cond
-        [(empty? dispos) empty]
-        [(empty? (rest dispos)) empty]
-        [else (append
-               (gambis (first dispos) (first (rest dispos)))
-               (encontrar-dispo-semana-em-comum tempo (rest dispos)))]))
-    ;; list string -> void
-    ;; Esta é a função principal. Esta função é chamada a partir do arquivo
-    ;; reuni-main.rkt
-    ;;
-    ;; args é a lista de parâmetros para o programa.
-    ;;
-    ;; O primeiro parâmetro é o tempo mínimo (string) que os intervalos em comum
-    ;; devem ter. O tempo mínimo é especificado usando a formatação de horário.
-    ;;
-    ;; O restante dos parâmetros são nomes de arquivos. Cada arquivo de entrada
-    ;; contêm uma disponibilidade semanal. Veja exemplos de arquivos no diretórios
-    ;; testes.
-    ;;
-    ;; A saída desta função é a escrita na tela dos intervalos em comum que
-    ;; foram encontrados. O formato da saída deve ser o mesmo da disponibilidade
-    ;; semanal.
-    (define (main args)
-      (error "Não implementado"))
-    
-    ;;Test ... -> Void
-    ;;Execute um conjunto de testes.
-    (define (executa-testes . testes)
-      (run-tests (test-suite "Todos os testes" testes))
-      (void))
-    
-    ;;Chama a função para executar os testes.;
-    (executa-testes minutos-tests)
-    (executa-testes tempo-tests)
-    (executa-testes intervalo-tempo-tests)
-    (executa-testes intervalo-intersecao-tests)
-    
-    (define dispo-semana-a
-      (list (list "seg" (list (intervalo (horario 08 30) (horario 10 30))
-                              (intervalo (horario 14 03) (horario 16 00))
-                              (intervalo (horario 17 10) (horario 18 10))))
-            (list "ter" (list (intervalo (horario 13 30) (horario 15 45))))
-            (list "qua" (list (intervalo (horario 11 27) (horario 13 00))
-                              (intervalo (horario 15 00) (horario 19 00))))
-            (list "sex" (list (intervalo (horario 07 30) (horario 11 30))
-                              (intervalo (horario 13 30) (horario 14 00))
-                              (intervalo (horario 15 02) (horario 16 00))
-                              (intervalo (horario 17 20) (horario 18 30))))))
-    
-    (define dispo-semana-b
-      (list (list "seg" (list (intervalo (horario 14 35) (horario 17 58))))
-            (list "ter" (list (intervalo (horario 08 40) (horario 10 30))
-                              (intervalo (horario 13 31) (horario 15 13))))
-            (list "qui" (list (intervalo (horario 08 30) (horario 15 30))))
-            (list "sex" (list (intervalo (horario 14 07) (horario 15 00))
-                              (intervalo (horario 16 00) (horario 17 30))
-                              (intervalo (horario 19 00) (horario 22 00))))))
-    
-    (define dispo-semana-a-b
-      (list dispo-semana-a dispo-semana-b))
+               (let ([dispo (encontrar-dispo-em-comum intervalos-a (cadr b) tempo)])
+                 (cond
+                   [(empty? dispo) empty]                   
+                   [else (list dia-a dispo)]))))))    
+  (cond
+    [(empty? dispo-a) empty]
+    [(empty? dispo-b) empty]
+    [else (append
+           (let ([d-iter  (iter (car dispo-a) dispo-b)])
+             (if (empty? d-iter)
+                 empty
+                 (list (iter (car dispo-a) dispo-b))))
+           (encontrar-dispo-a-b (cdr dispo-a) dispo-b tempo))]))
+
+(define (encontrar-dispo-semana-em-comum tempo dispos)
+  (foldr (lambda (a b) (encontrar-dispo-a-b a b tempo)) (first dispos) dispos))
+;; list string -> void
+;; Esta é a função principal. Esta função é chamada a partir do arquivo
+;; reuni-main.rkt
+;;
+;; args é a lista de parâmetros para o programa.
+;;
+;; O primeiro parâmetro é o tempo mínimo (string) que os intervalos em comum
+;; devem ter. O tempo mínimo é especificado usando a formatação de horário.
+;;
+;; O restante dos parâmetros são nomes de arquivos. Cada arquivo de entrada
+;; contêm uma disponibilidade semanal. Veja exemplos de arquivos no diretórios
+;; testes.
+;;
+;; A saída desta função é a escrita na tela dos intervalos em comum que
+;; foram encontrados. O formato da saída deve ser o mesmo da disponibilidade
+;; semanal.
+
+(define (string->horario s)
+  (horario (string->number (substring s 0 2)) (string->number (substring s 3 5))))
+
+(define (string->intervalo s)
+  (intervalo (string->horario (substring s 0 5)) (string->horario (substring s 6 11))))
+
+(define (string->list-intervalo s)
+  (define (iter lst)
+    (cond
+      [(empty? lst) empty]
+      [else (append
+             (list (string->horario (first lst)))
+             (iter (rest lst)))]))
+  (iter (string-split s)))
+
+(define (string->dispo s)
+  (list (substring s 0 3)
+        (string->list-intervalo (substring s 3))))
+
+(define (string->dispo-semana s)
+  (define (iter lst)
+    (cond
+      [(empty? lst) empty]
+      [else (append
+             (list (string->dispo (first lst)))
+             (iter (rest lst)))]))
+  (iter (string-split s "\n")))
+
+(define (args->list-dispo a)
+  (cond
+    [(empty? a) empty]
+    [else (append
+           (list (string->dispo-semana (file->string (first a))))
+           (args->list-dispo (rest a)))]))
+
+(define (main args)
+  (encontrar-dispo-semana-em-comum (string->horario (first args)) (args->list-dispo (rest args))))
+  

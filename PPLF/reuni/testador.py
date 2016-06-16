@@ -9,21 +9,21 @@ def testar(prog, casos):
     for caso in casos:
         params, esperado = caso
         nome = " ".join(prog + params)
-        print (nome,)
+        print nome,
         ok, obtido = executar_programa(prog, params)
         obtido = obtido.split('\n')
         if obtido:
             obtido = obtido[:-1]
-        total += 1 
+        total += 1
         if not ok or obtido != esperado:
             falhas += 1
-            print('Falha')
-            print('Esperado:\n', "\n".join(esperado))
-            print('Obtido:\n', "\n".join(obtido))
-            print('---')
+            print 'Falha'
+            print 'Esperado:\n', "\n".join(esperado)
+            print 'Obtido:\n', "\n".join(obtido)
+            print '---'
         else:
-            print('OK')
-    print('Passou em', (total - falhas), 'teste(s) do total de', total)
+            print 'OK'
+    print 'Passou em', (total - falhas), 'teste(s) do total de', total
 
 def ler_casos(arquivo):
     casos = []
@@ -47,7 +47,7 @@ def executar_programa(prog, params):
     import subprocess
     try:
         return True, subprocess.check_output(prog + params, shell=True)
-        '''return True, subprocess.check_output(prog + params)'''
+        ##return True, subprocess.check_output(prog + params)
     except:
         r = "Erro ao executar o programa: %s\nExecute o programa no terminal para ver o erro.\n" % " ".join(prog + params)
         return False, r
@@ -55,6 +55,6 @@ def executar_programa(prog, params):
 if __name__ == '__main__':
     import sys
     if len(sys.argv) < 3:
-        print('Modo de usar: %s casos nome-do-programa [parametros]')
+        print 'Modo de usar: %s casos nome-do-programa [parametros]'
         sys.exit(1)
     main(sys.argv[1], sys.argv[2:])

@@ -226,8 +226,8 @@
 
 (define (check-encontrar-dispo-em-comum dispo-a dispo-b esperado)
   ; não importa a ordem dos parâmetros, a interseção é a mesma
-  (check-equal? (encontrar-dispo-em-comum dispo-a dispo-b (horario 00 00)) esperado)
-  (check-equal? (encontrar-dispo-em-comum dispo-b dispo-a (horario 00 00)) esperado))
+  (check-equal? (encontrar-dispo-em-comum dispo-a dispo-b) esperado)
+  (check-equal? (encontrar-dispo-em-comum dispo-b dispo-a) esperado))
 
 (define (check-encontrar-dispo-semana-em-comum tempo dispos esperado)
   (check-equal? (encontrar-dispo-semana-em-comum tempo dispos) esperado))
