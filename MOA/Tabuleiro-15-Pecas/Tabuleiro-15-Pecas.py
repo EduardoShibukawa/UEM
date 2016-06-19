@@ -12,4 +12,4 @@ class Tabuleiro:
 
     def __str__(self):
         return " ".join(str(v) for r in self.valor for v in r)
-
+    teste
