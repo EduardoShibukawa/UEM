@@ -12,4 +12,4 @@ Eduardo Shibukawa
 
 [![Build Status](https://travis-ci.org/EduardoShibukawa/UEM.svg?branch=MOA-PUZZLE-15)](https://travis-ci.org/EduardoShibukawa/UEM)
 
-[![Coverage Status](https://coveralls.io/repos/github/EduardoShibukawa/UEM/badge.svg?branch=master)](https://coveralls.io/github/EduardoShibukawa/UEM?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/EduardoShibukawa/UEM/badge.svg?branch=MOA-PUZZLE-15)](https://coveralls.io/github/EduardoShibukawa/UEM?branch=MOA-PUZZLE-15)
