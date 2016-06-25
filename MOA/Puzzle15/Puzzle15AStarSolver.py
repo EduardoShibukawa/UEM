@@ -1,10 +1,12 @@
+import hashlib
+from PriorityQueue import *
+from Puzzle15 import *
 from HeuristicSolver import *
 from Heuristic1 import Heuristic1
 from Heuristic2 import Heuristic2
 from Heuristic3 import Heuristic3
-from PriorityQueue import *
-from Puzzle15 import *
 from Heuristic4 import Heuristic4
+from Heuristic5 import Heuristic5
 
 
 class Puzzle15State:
@@ -53,17 +55,16 @@ class Puzzle15AStarSolver:
             current.generate_children()
             for c in current.children:
                 if self.__indexed__(c.puzzle) not in current_cost:
+                    h1 = Heuristic1(c.puzzle, goal)
+                    h2 = Heuristic2(c.puzzle)
+                    h3 = Heuristic3(c.puzzle, goal)
+
                     heuristic_solver.clear()
-                    """
-                    heuristic_solver.add(Heuristic1(c.puzzle, goal))
-                    heuristic_solver.add(Heuristic2(c.puzzle))
-                    heuristic_solver.add(Heuristic3(c.puzzle, goal))
-                    """
-                    heuristic_solver.add(Heuristic4(
-                        Heuristic1(c.puzzle, goal),
-                        Heuristic2(c.puzzle),
-                        Heuristic3(c.puzzle, goal)
-                    ))
+                    ##heuristic_solver.add(h1)
+                    ##heuristic_solver.add(h2)
+                    ##heuristic_solver.add(h3)
+                    heuristic_solver.add(Heuristic4(h1, h2, h3))
+                    heuristic_solver.add(Heuristic5(h1, h2, h3))
 
                     current_cost[self.__indexed__(current)] = c.moves
                     open_states.put(heuristic_solver.solve() + c.moves, c)
