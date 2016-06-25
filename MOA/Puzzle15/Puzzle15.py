@@ -66,13 +66,12 @@ class Puzzle15:
             raise InvalidPuzzle15Move('Movimento Invalido!')
 
         self.value[self.empty_pos[0]][self.empty_pos[1]] = self.value[col][line]
-
-        self.empty_pos = (col, line)
         self.value[col][line] = 0
+        self.empty_pos = (col, line)
 
     def __str__(self):
         return str(self.value) + "\n" + "".join(
             str(self.value[x][y]) + "\n" if y == 3 else
-            str(self.value[x][y]) + " " for x in range(0, 4) for y in range(0, 4))
+            str(self.value[x][y]) + " " for x in range(0, self.size) for y in range(0, self.size))
 
 

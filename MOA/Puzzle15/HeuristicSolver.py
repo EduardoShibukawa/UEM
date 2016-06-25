@@ -11,5 +11,5 @@ class HeuristicSolver:
     def solve(self):
         s = 0
         for h in self._heuristics:
-            s = h.calc()
+            s += h.calc()
         return s

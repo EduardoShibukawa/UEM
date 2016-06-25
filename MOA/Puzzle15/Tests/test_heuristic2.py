@@ -5,19 +5,18 @@ from Puzzle15 import Puzzle15
 
 class TestHeuristic2(TestCase):
     def test_6_unordered_values(self):
-        p = Puzzle15('12 1 2 3 '
-                     '4 5 7 8 '
-                     '0 9 10 11 '
-                     '13 14 6 15')
+        p = Puzzle15('12 11 10 9 '
+                     '1 13 15 0 '
+                     '2 14 6 8 '
+                     '3 4 5 7')
 
         h = Heuristic2(p)
         self.assertEqual(h.calc(), 6)
 
-    def test_no_unordered_values(self):
-        p = Puzzle15('0 1 2 3 '
-                     '4 5 6 7 '
-                     '8 9 10 11 '
-                     '12 13 14 15')
-
+    def test_ordered_values(self):
+        p = Puzzle15('0 11 10 9 '
+                     '1 12 15 8 '
+                     '2 13 14 7 '
+                     '3 4 5 6')
         h = Heuristic2(p)
         self.assertEqual(h.calc(), 0)

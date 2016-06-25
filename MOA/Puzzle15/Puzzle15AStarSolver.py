@@ -1,8 +1,10 @@
 from HeuristicSolver import *
 from Heuristic1 import Heuristic1
 from Heuristic2 import Heuristic2
+from Heuristic3 import Heuristic3
 from PriorityQueue import *
 from Puzzle15 import *
+from Heuristic4 import Heuristic4
 
 
 class Puzzle15State:
@@ -36,12 +38,14 @@ class Puzzle15AStarSolver:
 
     def solve(self, start, goal):
         heuristic_solver = HeuristicSolver()
-        self.moves = -1
         current_cost = {}
         open_states = PriorityQueue()
         open_states.put(0, Puzzle15State(start, 0))
+        self.moves = -1
+
         while not open_states.empty():
             current = open_states.get()
+
             if str(current.puzzle) == str(goal):
                 self.moves = current.moves
                 break
@@ -50,8 +54,17 @@ class Puzzle15AStarSolver:
             for c in current.children:
                 if self.__indexed__(c.puzzle) not in current_cost:
                     heuristic_solver.clear()
-                    ##heuristic_solver.add(Heuristic1(c.puzzle, goal))
+                    """
+                    heuristic_solver.add(Heuristic1(c.puzzle, goal))
                     heuristic_solver.add(Heuristic2(c.puzzle))
+                    heuristic_solver.add(Heuristic3(c.puzzle, goal))
+                    """
+                    heuristic_solver.add(Heuristic4(
+                        Heuristic1(c.puzzle, goal),
+                        Heuristic2(c.puzzle),
+                        Heuristic3(c.puzzle, goal)
+                    ))
+
                     current_cost[self.__indexed__(current)] = c.moves
                     open_states.put(heuristic_solver.solve() + c.moves, c)
 
