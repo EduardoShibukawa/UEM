@@ -51,3 +51,24 @@ class TestPuzzle15AStarSolver(TestCase):
                      '4 0 7 9 '
                      '5 13 14 8'),
             20)
+
+    def test_solve_9_moves(self):
+        s = Puzzle15("2 3 4 0 "
+                     "1 5 7 8 "
+                     "9 6 10 12 "
+                     "13 14 11 15")
+        g = Puzzle15("1 2 3 4 "
+                     "5 6 7 8 "
+                     "9 10 11 12 "
+                     "13 14 15 0")
+
+        solver = Puzzle15AStarSolver()
+        self.assertEqual(solver.solve(s, g), 9)
+
+    def test_solve_62_moves(self):
+        self.__test_solve_x_moves__(
+            Puzzle15("2 3 4 0 "
+                     "1 5 7 8 "
+                     "9 6 10 12 "
+                     "13 14 11 15"),
+            62)
