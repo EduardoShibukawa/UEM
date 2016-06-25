@@ -9,4 +9,4 @@ env:
   - PUZZLE15_DIR = MOA\Puzzle15
 
 script:
-  - cd $TEST_DIR && python setup.py test
+  - cd $PUZZLE15_DIR && python setup.py test
