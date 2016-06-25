@@ -1,0 +1,17 @@
+language: python
+
+python:
+  - "3.5"
+
+sudo: required
+
+install:
+  - pip install coveralls
+
+script:
+  - cd MOA
+  - cd Puzzle15
+  - coverage run --source=Puzzle15 Setup.py test
+
+after_success:
+  - coveralls
