@@ -1,6 +1,7 @@
 from unittest import TestCase
-from Heuristic1 import Heuristic1
-from Puzzle15 import *
+
+from Puzzle15.Puzzle15 import Puzzle15
+from Heuristic.Heuristic1 import Heuristic1
 
 
 class TestHeuristic1(TestCase):

@@ -1,6 +1,7 @@
 from unittest import TestCase
-from Puzzle15 import *
-from Puzzle15AStarSolver import Puzzle15State
+
+from Puzzle15.Puzzle15 import *
+from Puzzle15.Puzzle15AStarSolver import Puzzle15State
 
 
 class TestPuzzle15State(TestCase):

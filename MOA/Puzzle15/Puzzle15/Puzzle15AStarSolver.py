@@ -1,13 +1,11 @@
-import hashlib
-from PriorityQueue import *
-from Puzzle15 import *
-from HeuristicSolver import *
-from Heuristic1 import Heuristic1
-from Heuristic2 import Heuristic2
-from Heuristic3 import Heuristic3
-from Heuristic4 import Heuristic4
-from Heuristic5 import Heuristic5
-
+from Heuristic.Heuristic1 import Heuristic1
+from Heuristic.Heuristic2 import Heuristic2
+from Heuristic.Heuristic3 import Heuristic3
+from Heuristic.Heuristic4 import Heuristic4
+from Heuristic.Heuristic5 import Heuristic5
+from Heuristic.HeuristicSolver import HeuristicSolver
+from Utils.PriorityQueue import PriorityQueue
+from Puzzle15.Puzzle15 import *
 
 class Puzzle15State:
     def __init__(self, puzzle, moves):

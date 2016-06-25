@@ -1,7 +1,8 @@
 from unittest import TestCase
-from PriorityQueue import *
-from Puzzle15 import Puzzle15
-from Puzzle15AStarSolver import Puzzle15State
+
+from Puzzle15.Puzzle15 import Puzzle15
+from Puzzle15.Puzzle15AStarSolver import Puzzle15State
+from Utils.PriorityQueue import *
 
 
 class TestPriorityQueue(TestCase):
