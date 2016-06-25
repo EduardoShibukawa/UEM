@@ -5,5 +5,8 @@ python:
 
 sudo: required
 
+env:
+  - PUZZLE15_DIR = MOA\Puzzle15
+
 script:
-  - python setup.py test
+  - cd $TEST_DIR && python setup.py test
