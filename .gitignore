@@ -45,3 +45,27 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+MOA/Puzzle15/.coverage
+MOA/Puzzle15/.idea/workspace.xml
+MOA/Puzzle15/Heuristic/__pycache__/Heuristic1.cpython-35.pyc
+MOA/Puzzle15/Heuristic/__pycache__/Heuristic2.cpython-35.pyc
+MOA/Puzzle15/Heuristic/__pycache__/Heuristic3.cpython-35.pyc
+MOA/Puzzle15/Heuristic/__pycache__/Heuristic4.cpython-35.pyc
+MOA/Puzzle15/Heuristic/__pycache__/Heuristic5.cpython-35.pyc
+MOA/Puzzle15/Heuristic/__pycache__/HeuristicSolver.cpython-35.pyc
+MOA/Puzzle15/Heuristic/__pycache__/__init__.cpython-35.pyc
+MOA/Puzzle15/Puzzle15.egg-info/SOURCES.txt
+MOA/Puzzle15/Puzzle15.egg-info/dependency_links.txt
+MOA/Puzzle15/Puzzle15.egg-info/top_level.txt
+MOA/Puzzle15/Puzzle15/__pycache__/Puzzle15.cpython-35.pyc
+MOA/Puzzle15/Puzzle15/__pycache__/Puzzle15AStarSolver.cpython-35.pyc
+MOA/Puzzle15/Test/__pycache__/__init__.cpython-35.pyc
+MOA/Puzzle15/Test/__pycache__/test_heuristic1.cpython-35.pyc
+MOA/Puzzle15/Test/__pycache__/test_heuristic2.cpython-35.pyc
+MOA/Puzzle15/Test/__pycache__/test_heuristic3.cpython-35.pyc
+MOA/Puzzle15/Test/__pycache__/test_priorityQueue.cpython-35.pyc
+MOA/Puzzle15/Test/__pycache__/test_puzzle15.cpython-35.pyc
+MOA/Puzzle15/Test/__pycache__/test_puzzle15AStarSolver.cpython-35.pyc
+MOA/Puzzle15/Test/__pycache__/test_puzzle15State.cpython-35.pyc
+MOA/Puzzle15/Utils/__pycache__/PriorityQueue.cpython-35.pyc
+MOA/Puzzle15/Utils/__pycache__/__init__.cpython-35.pyc
