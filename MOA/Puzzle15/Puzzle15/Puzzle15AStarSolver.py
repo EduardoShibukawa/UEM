@@ -7,6 +7,7 @@ from Heuristic.HeuristicSolver import HeuristicSolver
 from Utils.PriorityQueue import PriorityQueue
 from Puzzle15.Puzzle15 import *
 
+
 class Puzzle15State:
     def __init__(self, puzzle, moves):
         self.puzzle = puzzle
@@ -62,7 +63,7 @@ class Puzzle15AStarSolver:
                     ##heuristic_solver.add(h2)
                     ##heuristic_solver.add(h3)
                     heuristic_solver.add(Heuristic4(h1, h2, h3))
-                    heuristic_solver.add(Heuristic5(h1, h2, h3))
+                    ##heuristic_solver.add(Heuristic5(h1, h2, h3))
 
                     current_cost[self.__indexed__(current)] = c.moves
                     open_states.put(heuristic_solver.solve() + c.moves, c)

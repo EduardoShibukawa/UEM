@@ -20,6 +20,7 @@ class Direction(Enum):
 class Puzzle15:
     def __init__(self, value):
         self.size = 4
+        self.str_value = ''
         if type(value) is str:
             value = value.split(" ")
             self.value = []
@@ -68,10 +69,17 @@ class Puzzle15:
         self.value[self.empty_pos[0]][self.empty_pos[1]] = self.value[col][line]
         self.value[col][line] = 0
         self.empty_pos = (col, line)
+        self.str_value = ''
 
-    def __str__(self):
+    def __to_str__(self):
         return str(self.value) + "\n" + "".join(
             str(self.value[x][y]) + "\n" if y == 3 else
             str(self.value[x][y]) + " " for x in range(0, self.size) for y in range(0, self.size))
+
+    def __str__(self):
+        if self.str_value == '':
+            self.str_value = self.__to_str__()
+
+        return self.str_value
 
 
