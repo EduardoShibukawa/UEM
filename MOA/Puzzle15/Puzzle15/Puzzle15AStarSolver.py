@@ -11,7 +11,7 @@ from Puzzle15.Puzzle15 import *
 class Puzzle15State:
     def __init__(self, puzzle, moves):
         self.puzzle = puzzle
-        self.children = []
+        self.children = set()
         self.moves = moves
 
     def __str__(self):
@@ -20,7 +20,7 @@ class Puzzle15State:
     def __generate_child__(self, direction):
         new = Puzzle15State(Puzzle15(self.puzzle), self.moves + 1)
         new.puzzle.move(direction)
-        self.children.append(new)
+        self.children.add(new)
 
     def generate_children(self):
         if not self.children:

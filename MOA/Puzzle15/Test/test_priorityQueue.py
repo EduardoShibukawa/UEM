@@ -26,5 +26,3 @@ class TestPriorityQueue(TestCase):
                                         '4 5 6 7'), 0))
         self.assertEqual(q.get().moves, 0)
         self.assertEqual(q.get().moves, 1)
-        self.assertEqual(q.get().moves, 1)
-        self.assertEqual(q.get().moves, 2)
