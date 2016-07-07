@@ -20,19 +20,25 @@ class Direction(Enum):
 class Puzzle15:
     def __init__(self, value):
         self.size = 4
-        self.str_value = ''
+        self.value = []
+        self._str_value = ""
         if type(value) is str:
             value = value.split(" ")
-            self.value = []
+            list(filter(('').__ne__, value))
             for i in range(0, self.size):
                 self.value.append([])
                 for j in range(0, self.size):
                     self.value[i].append(int(value[(i * 4) + j]))
+                    self._str_value += value[(i * 4) + j] + " "
                     if int(value[(i*4) + j]) == 0:
                         self.empty_pos = (i, j)
         elif type(value) is Puzzle15:
-            self.value = copy.deepcopy(value.value)
             self.empty_pos = value.empty_pos
+            for i in range(0, self.size):
+                self.value.append([])
+                for j in range(0, self.size):
+                    self.value[i].append(value.value[i][j])
+                    self._str_value += str(value.value[i][j]) + " "
 
     def valid_position(self, x, y):
         return (x < self.size) and (x >= 0) and (y < self.size) and (y >= 0)
@@ -66,20 +72,33 @@ class Puzzle15:
         if not self.valid_position(col, line):
             raise InvalidPuzzle15Move('Movimento Invalido!')
 
-        self.value[self.empty_pos[0]][self.empty_pos[1]] = self.value[col][line]
-        self.value[col][line] = 0
+        if self._str_value != '':
+            l = self._str_value.split(" ")
+            i_0 = l.index('0')
+            i_v = l.index(str(self.value[col][line]))
+            l[i_0], l[i_v] = l[i_v], l[i_0]
+            self._str_value = " ".join(l)
+
+        self.value[self.empty_pos[0]][self.empty_pos[1]], self.value[col][line] \
+            = self.value[col][line], self.value[self.empty_pos[0]][self.empty_pos[1]]
         self.empty_pos = (col, line)
-        self.str_value = ''
 
     def __to_str__(self):
-        return str(self.value) + "\n" + "".join(
+        return "".join(
+            str(self.value[x][y]) + " "
+            for x in range(0, self.size)
+            for y in range(0, self.size)
+        )
+
+    def __to_formated_str__(self):
+        return "".join(
             str(self.value[x][y]) + "\n" if y == 3 else
             str(self.value[x][y]) + " " for x in range(0, self.size) for y in range(0, self.size))
 
     def __str__(self):
-        if self.str_value == '':
-            self.str_value = self.__to_str__()
+        if self._str_value == '':
+            self._str_value = self.__to_str__()
 
-        return self.str_value
+        return self._str_value
 
 
