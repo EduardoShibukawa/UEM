@@ -69,3 +69,5 @@ MOA/Puzzle15/Test/__pycache__/test_puzzle15AStarSolver.cpython-35.pyc
 MOA/Puzzle15/Test/__pycache__/test_puzzle15State.cpython-35.pyc
 MOA/Puzzle15/Utils/__pycache__/PriorityQueue.cpython-35.pyc
 MOA/Puzzle15/Utils/__pycache__/__init__.cpython-35.pyc
+MOA/Puzzle15/.idea/Puzzle15.iml
+MOA/Puzzle15/62003.py

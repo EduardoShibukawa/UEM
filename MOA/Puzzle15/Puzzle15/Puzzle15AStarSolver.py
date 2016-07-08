@@ -3,7 +3,6 @@ from Heuristic.Heuristic2 import Heuristic2
 from Heuristic.Heuristic3 import Heuristic3
 from Heuristic.Heuristic4 import Heuristic4
 from Heuristic.Heuristic5 import Heuristic5
-from Heuristic.HeuristicSolver import HeuristicSolver
 from Utils.PriorityQueue import PriorityQueue
 from Puzzle15.Puzzle15 import *
 
@@ -13,6 +12,7 @@ class Puzzle15State:
         self.puzzle = puzzle
         self.children = set()
         self.moves = moves
+        self.heuristic_value = 0
 
     def __str__(self):
         return str(self.puzzle)
@@ -28,6 +28,8 @@ class Puzzle15State:
                 if self.puzzle.can_move(direction):
                     self.__generate_child__(direction)
 
+    def fn(self):
+        return self.heuristic_value + self.moves
 
 class Puzzle15AStarSolver:
     @staticmethod
@@ -38,8 +40,7 @@ class Puzzle15AStarSolver:
         self.moves = -1
 
     def solve(self, start, goal):
-        heuristic_solver = HeuristicSolver()
-        current_cost = {}
+        closed_states = set()
         open_states = PriorityQueue()
         open_states.put(0, Puzzle15State(start, 0))
         self.moves = -1
@@ -53,19 +54,15 @@ class Puzzle15AStarSolver:
 
             current.generate_children()
             for c in current.children:
-                if self.__indexed__(c.puzzle) not in current_cost:
+                if self.__indexed__(c.puzzle) not in closed_states:
                     h1 = Heuristic1(c.puzzle, goal)
                     h2 = Heuristic2(c.puzzle)
                     h3 = Heuristic3(c.puzzle, goal)
+                    h4 = Heuristic4(h1, h2, h3)
+                    h5 = Heuristic5(h1, h2, h3)
 
-                    heuristic_solver.clear()
-                    ##heuristic_solver.add(h1)
-                    ##heuristic_solver.add(h2)
-                    ##heuristic_solver.add(h3)
-                    heuristic_solver.add(Heuristic4(h1, h2, h3))
-                    ##heuristic_solver.add(Heuristic5(h1, h2, h3))
-
-                    current_cost[self.__indexed__(current)] = c.moves
-                    open_states.put(heuristic_solver.solve() + c.moves, c)
+                    c.heuristic_value = h4.calc()
+                    closed_states.add(self.__indexed__(current))
+                    open_states.put(c.heuristic_value + c.moves, c)
 
         return self.moves
