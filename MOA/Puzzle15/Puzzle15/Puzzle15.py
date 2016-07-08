@@ -24,7 +24,7 @@ class Puzzle15:
         self._str_value = ""
         if type(value) is str:
             value = value.split(" ")
-            list(filter(''.__ne__, value))
+            list(filter(('').__ne__, value))
             for i in range(0, self.size):
                 self.value.append([])
                 for j in range(0, self.size):
@@ -41,10 +41,7 @@ class Puzzle15:
                     self._str_value += str(value.value[i][j]) + " "
 
     def valid_position(self, x, y):
-        return (x < self.size) \
-               and (x >= 0) \
-               and (y < self.size) \
-               and (y >= 0)
+        return (x < self.size) and (x >= 0) and (y < self.size) and (y >= 0)
 
     def can_move(self, direction):
         (col, line) = self.empty_pos
@@ -92,6 +89,11 @@ class Puzzle15:
             for x in range(0, self.size)
             for y in range(0, self.size)
         )
+
+    def __to_formated_str__(self):
+        return "".join(
+            str(self.value[x][y]) + "\n" if y == 3 else
+            str(self.value[x][y]) + " " for x in range(0, self.size) for y in range(0, self.size))
 
     def __str__(self):
         if self._str_value == '':
