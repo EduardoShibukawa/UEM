@@ -18,12 +18,12 @@ class Heuristic3:
 
                 for col in range(0, self._goal.size):
                     for lin in range(0, self._goal.size):
-                        self._goal.dic_goal[self._goal.value[col][lin]] = (col, lin)
+                        self._goal.dic_goal[self._goal.get_value(col, lin)] = (col, lin)
 
             for col in range(0, self._current.size):
                 for lin in range(0, self._current.size):
                     self.heuristic_value += self.__calc_dist__(
-                        self._goal.dic_goal[self._current.value[col][lin]],
+                        self._goal.dic_goal[self._current.get_value(col, lin)],
                         (col, lin)
                     )
 

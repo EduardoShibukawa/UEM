@@ -8,6 +8,9 @@ from Puzzle15.Puzzle15 import *
 
 
 class Puzzle15State:
+    def __lt__(self, other):
+        return self.fn() < other.fn()
+
     def __init__(self, puzzle, moves):
         self.puzzle = puzzle
         self.children = set()
@@ -31,6 +34,7 @@ class Puzzle15State:
     def fn(self):
         return self.heuristic_value + self.moves
 
+
 class Puzzle15AStarSolver:
     @staticmethod
     def __indexed__(value):
@@ -42,7 +46,7 @@ class Puzzle15AStarSolver:
     def solve(self, start, goal):
         closed_states = set()
         open_states = PriorityQueue()
-        open_states.put(0, Puzzle15State(start, 0))
+        open_states.put(Puzzle15State(start, 0))
         self.moves = -1
 
         while not open_states.empty():
@@ -52,17 +56,17 @@ class Puzzle15AStarSolver:
                 self.moves = current.moves
                 break
 
+            closed_states.add(self.__indexed__(current))
             current.generate_children()
             for c in current.children:
-                if self.__indexed__(c.puzzle) not in closed_states:
+                if self.__indexed__(c) not in closed_states:
                     h1 = Heuristic1(c.puzzle, goal)
                     h2 = Heuristic2(c.puzzle)
                     h3 = Heuristic3(c.puzzle, goal)
                     h4 = Heuristic4(h1, h2, h3)
-                    h5 = Heuristic5(h1, h2, h3)
+                   #h5 = Heuristic5(h1, h2, h3)
 
                     c.heuristic_value = h4.calc()
-                    closed_states.add(self.__indexed__(current))
-                    open_states.put(c.heuristic_value + c.moves, c)
+                    open_states.put(c)
 
         return self.moves

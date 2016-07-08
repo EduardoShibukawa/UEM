@@ -19,21 +19,25 @@ class Heuristic2:
             lim = self._puzzle.size - 1
             while c < self._puzzle.size * self._puzzle.size:
                 for i in range(ini, lim + 1):
-                    self.__gambis__(b, self._puzzle.value[i][ini])
+                    x = self._puzzle.get_value(i, ini)
+                    self.__gambis__(b, x)
                     c += 1
-                    b = self._puzzle.value[i][ini]
+                    b = x
                 for i in range(ini + 1, lim + 1):
-                    self.__gambis__(b, self._puzzle.value[lim][i])
+                    x = self._puzzle.get_value(lim, i)
+                    self.__gambis__(b, x)
                     c += 1
-                    b = self._puzzle.value[lim][i]
+                    b = x
                 for i in range(lim - 1, ini - 1, -1):
-                    self.__gambis__(b, self._puzzle.value[i][lim])
+                    x = self._puzzle.get_value(i, lim)
+                    self.__gambis__(b, x)
                     c += 1
-                    b = self._puzzle.value[i][lim]
+                    b = x
                 for i in range(lim - 1, ini, -1):
-                    self.__gambis__(b, self._puzzle.value[ini][i])
+                    x = self._puzzle.get_value(ini, i)
+                    self.__gambis__(b, x)
                     c += 1
-                    b = self._puzzle.value[ini][i]
+                    b = x
 
                 ini += 1
                 lim -= 1

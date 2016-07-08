@@ -58,10 +58,10 @@ class TestPuzzle15AStarSolver(TestCase):
             Puzzle15("0 2 15 11 4 12 3 10 1 9 6 8 5 7 13 14 "),
             37)
 
-def test_solve_case_10(self):
-    self.__test_solve_x_moves__(
-        Puzzle15("4 2 15 11 1 12 3 10 9 7 6 8 5 0 13 14 "),
-        39)
+    def test_solve_case_10(self):
+        self.__test_solve_x_moves__(
+            Puzzle15("4 2 15 11 1 12 3 10 9 7 6 8 5 0 13 14 "),
+            39)
 
 def test_solve_46_moves(self):
     self.__test_solve_x_moves__(
