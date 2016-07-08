@@ -3,16 +3,20 @@ from Heuristic.Heuristic2 import Heuristic2
 from Heuristic.Heuristic3 import Heuristic3
 from Heuristic.Heuristic4 import Heuristic4
 from Heuristic.Heuristic5 import Heuristic5
-from Heuristic.HeuristicSolver import HeuristicSolver
-from Utils.PriorityQueue import PriorityQueue
+from Utils.Puzzle15PriorityQueue import Puzzle15PriorityQueue
 from Puzzle15.Puzzle15 import *
 
 
 class Puzzle15State:
+    def __lt__(self, other):
+        return self.fn() < other.fn()
+
     def __init__(self, puzzle, moves):
         self.puzzle = puzzle
         self.children = set()
         self.moves = moves
+        self.heuristic = None
+        self.heuristic_value = -1
 
     def __str__(self):
         return str(self.puzzle)
@@ -28,6 +32,14 @@ class Puzzle15State:
                 if self.puzzle.can_move(direction):
                     self.__generate_child__(direction)
 
+    def fn(self):
+        if self.moves == 0:
+            return 0
+        else:
+            if self.heuristic_value < 0:
+                self.heuristic_value = self.heuristic.calc()
+            return self.heuristic_value + self.moves
+
 
 class Puzzle15AStarSolver:
     @staticmethod
@@ -38,10 +50,9 @@ class Puzzle15AStarSolver:
         self.moves = -1
 
     def solve(self, start, goal):
-        heuristic_solver = HeuristicSolver()
-        current_cost = {}
-        open_states = PriorityQueue()
-        open_states.put(0, Puzzle15State(start, 0))
+        closed_states = set()
+        open_states = Puzzle15PriorityQueue()
+        open_states.put(Puzzle15State(start, 0))
         self.moves = -1
 
         while not open_states.empty():
@@ -53,19 +64,15 @@ class Puzzle15AStarSolver:
 
             current.generate_children()
             for c in current.children:
-                if self.__indexed__(c.puzzle) not in current_cost:
+                if self.__indexed__(c.puzzle) not in closed_states:
                     h1 = Heuristic1(c.puzzle, goal)
                     h2 = Heuristic2(c.puzzle)
                     h3 = Heuristic3(c.puzzle, goal)
+                    h4 = Heuristic4(h1, h2, h3)
+                    # h5 = Heuristic5(h1, h2, h3)
+                    c.heuristic = h4
 
-                    heuristic_solver.clear()
-                    ##heuristic_solver.add(h1)
-                    ##heuristic_solver.add(h2)
-                    ##heuristic_solver.add(h3)
-                    heuristic_solver.add(Heuristic4(h1, h2, h3))
-                    ##heuristic_solver.add(Heuristic5(h1, h2, h3))
-
-                    current_cost[self.__indexed__(current)] = c.moves
-                    open_states.put(heuristic_solver.solve() + c.moves, c)
+                    closed_states.add(c)
+                    open_states.put(c)
 
         return self.moves
