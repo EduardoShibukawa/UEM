@@ -16,15 +16,13 @@ class Heuristic3:
             if not hasattr(self._goal, 'dic_goal'):
                 self._goal.dic_goal = {}
 
-                for col in range(0, self._goal.size):
-                    for lin in range(0, self._goal.size):
-                        self._goal.dic_goal[self._goal.get_value(col, lin)] = (col, lin)
+                for i in range(0, self._current.size * self._current.size):
+                    self._goal.dic_goal[self._goal.get_value(i // 4, i % 4)] = (i // 4, i % 4)
 
-            for col in range(0, self._current.size):
-                for lin in range(0, self._current.size):
-                    self.heuristic_value += self.__calc_dist__(
-                        self._goal.dic_goal[self._current.get_value(col, lin)],
-                        (col, lin)
+            for i in range(0, self._current.size * self._current.size):
+                self.heuristic_value += self.__calc_dist__(
+                        self._goal.dic_goal[self._current.get_value(i // 4, i % 4)],
+                        (i // 4, i % 4)
                     )
 
         return self.heuristic_value

@@ -29,7 +29,7 @@ class Puzzle15:
                 if v != '':
                     self.value.append(int(v))
                     self._str_value += v.zfill(2)
-                    if int(value[i]) == 0:
+                    if int(v) == 0:
                         self.empty_pos = (i // 4, i % 4)
                     i += 1
 

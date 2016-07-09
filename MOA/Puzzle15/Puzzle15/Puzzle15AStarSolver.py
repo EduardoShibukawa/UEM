@@ -60,13 +60,13 @@ class Puzzle15AStarSolver:
             current.generate_children()
             for c in current.children:
                 if self.__indexed__(c) not in closed_states:
-                    h1 = Heuristic1(c.puzzle, goal)
-                    h2 = Heuristic2(c.puzzle)
-                    h3 = Heuristic3(c.puzzle, goal)
-                    h4 = Heuristic4(h1, h2, h3)
-                   #h5 = Heuristic5(h1, h2, h3)
+                    #h1 = Heuristic1(c.puzzle, goal)
+                    #h2 = Heuristic2(c.puzzle)
+                    #h3 = Heuristic3(c.puzzle, goal)
+                    #h4 = Heuristic4(h1, h2, h3)
+                    #h5 = Heuristic5(h1, h2, h3)
 
-                    c.heuristic_value = h4.calc()
+                    c.heuristic_value = h3.calc()
                     open_states.put(c)
 
         return self.moves
