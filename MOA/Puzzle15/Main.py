@@ -11,13 +11,12 @@ def fn_timer(function):
         t0 = time.time()
         result = function(*args, **kwargs)
         t1 = time.time()
-        print("Total time running %s: %s seconds" %
-              (function.__name__, str(t1-t0)))
+        print("Tempo: {0} seconds".format(str(t1-t0)))
         return result
     return function_timer
 
-#@profile
-@fn_timer
+# @profile# Para ativar o profiler de memoria
+@fn_timer# Para medir o tempo de resolução da função
 def solve(str_puzzle):
     solver = Puzzle15AStarSolver()
     goal = Puzzle15('1 12 11 10 '
@@ -25,7 +24,8 @@ def solve(str_puzzle):
                     '3 14 15 8 '
                     '4 5 6 7')
     start = Puzzle15(str_puzzle)
-    print(solver.solve(start, goal))
+    print("Entrada: {0}".format(str_puzzle))
+    print("Movimentos: {0}".format(solver.solve(start, goal)))
 
 
 def main():
@@ -34,7 +34,6 @@ def main():
     else:
         str_puzzle = input()
 
-    print(str_puzzle)
     solve(str_puzzle)
 
 
