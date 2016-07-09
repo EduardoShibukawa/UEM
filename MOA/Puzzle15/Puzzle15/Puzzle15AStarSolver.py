@@ -62,7 +62,7 @@ class Puzzle15AStarSolver:
                 if self.__indexed__(c) not in closed_states:
                     #h1 = Heuristic1(c.puzzle, goal)
                     #h2 = Heuristic2(c.puzzle)
-                    #h3 = Heuristic3(c.puzzle, goal)
+                    h3 = Heuristic3(c.puzzle, goal)
                     #h4 = Heuristic4(h1, h2, h3)
                     #h5 = Heuristic5(h1, h2, h3)
 
