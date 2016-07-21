@@ -32,7 +32,7 @@ def main():
     if len(sys.argv) > 1:
         str_puzzle = sys.argv[1]
     else:
-        str_puzzle = input()
+        str_puzzle = input("Digite a entrada do Puzzle15: ")
 
     solve(str_puzzle)
 
