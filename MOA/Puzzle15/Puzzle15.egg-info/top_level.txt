@@ -1,4 +1,0 @@
-Heuristic
-Puzzle15
-Test
-Utils

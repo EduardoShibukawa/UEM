@@ -1,5 +1,5 @@
 from enum import Enum
-import copy
+from array import *
 
 
 class InvalidPuzzle15Move(Exception):
@@ -20,18 +20,26 @@ class Direction(Enum):
 class Puzzle15:
     def __init__(self, value):
         self.size = 4
+        self.value = array('i', [])
+        self._str_value = ""
         if type(value) is str:
+            i = 0
             value = value.split(" ")
-            self.value = []
-            for i in range(0, self.size):
-                self.value.append([])
-                for j in range(0, self.size):
-                    self.value[i].append(int(value[(i * 4) + j]))
-                    if int(value[(i*4) + j]) == 0:
-                        self.empty_pos = (i, j)
+            for v in value:
+                if v != '':
+                    self.value.append(int(v))
+                    self._str_value += v.zfill(2)
+                    if int(v) == 0:
+                        self.empty_pos = (i // 4, i % 4)
+                    i += 1
+
         elif type(value) is Puzzle15:
-            self.value = copy.deepcopy(value.value)
-            self.empty_pos = value.empty_pos
+            self.empty_pos = value.empty_pos[:]
+            self.value = value.value[:]
+            self._str_value = str(value)[:]
+
+    def get_value(self, i, j):
+        return self.value[(i * 4) + j]
 
     def valid_position(self, x, y):
         return (x < self.size) and (x >= 0) and (y < self.size) and (y >= 0)
@@ -65,13 +73,17 @@ class Puzzle15:
         if not self.valid_position(col, line):
             raise InvalidPuzzle15Move('Movimento Invalido!')
 
-        self.value[self.empty_pos[0]][self.empty_pos[1]] = self.value[col][line]
-        self.value[col][line] = 0
+        l = [self._str_value[i:i+2] for i in range(0, len(self._str_value), 2)]
+        i_0 = l.index('00')
+        i_v = l.index(str(self.get_value(col, line)).zfill(2))
+        l[i_0], l[i_v] = l[i_v], l[i_0]
+        self._str_value = "".join(l)
+
+        self.value[self.empty_pos[0] * 4 + self.empty_pos[1]], self.value[col * 4 + line] \
+            = self.value[col * 4 + line], self.value[self.empty_pos[0] * 4 + self.empty_pos[1]]
         self.empty_pos = (col, line)
 
     def __str__(self):
-        return str(self.value) + "\n" + "".join(
-            str(self.value[x][y]) + "\n" if y == 3 else
-            str(self.value[x][y]) + " " for x in range(0, self.size) for y in range(0, self.size))
+        return self._str_value
 
 

@@ -11,7 +11,7 @@ install:
 script:
   - cd MOA
   - cd Puzzle15
-  - coverage run --source=Puzzle15 Setup.py test
+  - coverage run Setup.py test
 
 after_success:
   - coveralls

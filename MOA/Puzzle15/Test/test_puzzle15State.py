@@ -12,7 +12,7 @@ class TestPuzzle15State(TestCase):
                                    '4 5 6 7'), 0)
         s.generate_children()
         self.assertEqual(len(s.children), 4)
-        self.assertEqual(s.children[0].moves, 1)
+        self.assertEqual(s.children.pop().moves, 1)
 
     def test_generate_2_children(self):
         s = Puzzle15State(Puzzle15('1 12 10 0 '
@@ -21,4 +21,4 @@ class TestPuzzle15State(TestCase):
                                    '4 5 6 7'), 1)
         s.generate_children()
         self.assertEqual(len(s.children), 2)
-        self.assertEqual(s.children[0].moves, 2)
+        self.assertEqual(s.children.pop().moves, 2)
