@@ -2,9 +2,10 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
+#include <zconf.h>
 
 #define NUM_FILAS 5
-#define NUM_THREADS_CLIENTE 10
+#define NUM_THREADS_CLIENTE 5
 #define NUM_CLIENTES_POR_THREAD 50
 
 sem_t sem_fila[NUM_FILAS];
@@ -32,7 +33,7 @@ int buscarFilaComMenorTamanho() {
 }
 
 void serAtendido(int fila) {
-    printf("cliente sendo atendido na fila %d \n", fila);
+    printf("Cliente sendo atendido caixa %d \n", fila);
 }
 
 void novoCliente() {
@@ -41,13 +42,13 @@ void novoCliente() {
     int menorFila = buscarFilaComMenorTamanho();
     sem_post(&sem_cliente[menorFila]);
     tamanho_fila[menorFila] += 1;
-    printf(
-            "Cliente entrando na fila %d, de tamanho %d \n",
-            menorFila, tamanho_fila[menorFila]
-    );
-
     pthread_mutex_unlock(&mutex);
 
+//    printf(
+//            "Cliente entrando na fila %d, de tamanho %d \n",
+//            menorFila, tamanho_fila[menorFila]
+//    );
+//
     sem_wait(&sem_fila[menorFila]);
     serAtendido(menorFila);
 }
@@ -68,21 +69,22 @@ int todasFilasVazias(){
 }
 
 void atenderCliente(int fila){
-    printf("Cliente sendo atendido na fila %d \n", fila);
+    printf("Caixa %d atendendo cliente \n", fila);
+    sleep(2);
 }
 
 int atenderClienteFila(int fila){
     pthread_mutex_lock(&mutex);
     if (tamanho_fila[fila] > 0){
         tamanho_fila[fila] -= 1;
-        printf(
-                "Cliente indo para atendimento na fila %d, de tamanho %d \n",
-                fila, tamanho_fila[fila]
-        );
+//        printf(
+//                "Cliente indo para atendimento na fila %d, de tamanho %d \n",
+//                fila, tamanho_fila[fila]
+//        );
         sem_post(&sem_fila[fila]);
         pthread_mutex_unlock(&mutex);
 
-        sem_post(&sem_cliente[fila]);
+        sem_wait(&sem_cliente[fila]);
         atenderCliente(fila);
 
         return true;
@@ -106,8 +108,8 @@ void filaVaziaAtenderOutraFila(int fila_origem){
 
 void bloquearFilaSeTodasEstiveremVazia(int fila){
     if (todasFilasVazias()) {
-        sem_wait(&sem_cliente[fila]);
         printf("bloqueando fila %d vazia. \n", fila);
+        sem_wait(&sem_cliente[fila]);
     }
 }
 
@@ -129,8 +131,12 @@ void inicializarSemaforos() {
 }
 
 void *threadNovosCliente(void *args) {
-    for (int i = 0; i < NUM_CLIENTES_POR_THREAD; i++)
-        novoCliente();
+    while (true) {
+        for (int i = 0; i < NUM_CLIENTES_POR_THREAD; i++)
+            novoCliente();
+
+        sleep(10);
+    }
 
     pthread_exit(NULL);
 }
