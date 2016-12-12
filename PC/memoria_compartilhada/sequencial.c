@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define NUM_FILAS 21
-#define NUM_CLIENTES 10000
+#define NUM_CLIENTES 400
 
 int clientes[NUM_CLIENTES];
 int tamanhoFila[NUM_FILAS];
@@ -45,6 +45,7 @@ int gerarIdCliente()
 void atenderCliente(int idClienteAtendido, int idFilaAtendido)
 {
     printf("Cliente %0*d atendido no caixa %0*d.\n", quantidadeZeros, idClienteAtendido, quantidadeZeros, idFilaAtendido);
+    sleep(1);
 }
 
 /// <summary>

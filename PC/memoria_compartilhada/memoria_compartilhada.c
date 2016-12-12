@@ -4,26 +4,24 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define NUM_FILAS 5
-#define NUM_THREADS_CLIENTE 5
-#define NUM_CLIENTES_POR_THREAD 10000000
+#define NUM_FILAS 4
+#define NUM_THREADS_CLIENTE 4
+#define NUM_CLIENTES_POR_THREAD 100
 
 sem_t sem_fila[NUM_FILAS];
 sem_t sem_cliente[NUM_FILAS];
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_barrier_t barrier;
 
 int tamanho_fila[NUM_FILAS];
 int clientes[NUM_THREADS_CLIENTE * NUM_CLIENTES_POR_THREAD];
 int index_cliente;
-int lojaAberta;
+int clientes_restantes;
 
 void inicializar() {
     index_cliente = -1;
-    lojaAberta = true;
+    clientes_restantes = NUM_THREADS_CLIENTE * NUM_CLIENTES_POR_THREAD;
 
     pthread_mutex_init(&mutex, NULL);
-    pthread_barrier_init(&barrier, NULL, NUM_THREADS_CLIENTE);
 
     for (int i = 0; i < NUM_FILAS; i++)
         sem_init(&sem_fila[i], 0, 0);
@@ -73,16 +71,17 @@ void novoCliente() {
     printf("Cliente %d chegou.\n", cliente);
 
     pthread_mutex_lock(&mutex);
-    index_cliente += 1;
-    clientes[index_cliente] = cliente;
+
     int menorFila = buscarFilaComMenorTamanho();
     sem_post(&sem_cliente[menorFila]);
     tamanho_fila[menorFila] += 1;
+    clientes_restantes -= 1;
+    index_cliente += 1;
+    clientes[index_cliente] = cliente;
+
     pthread_mutex_unlock(&mutex);
-
-    printf("Cliente %d entrou na fila %d.\n", cliente, menorFila);
-
     sem_wait(&sem_fila[menorFila]);
+
     serAtendido(cliente);
 }
 
@@ -102,6 +101,7 @@ int todasFilasVazias() {
 
 void atenderCliente(int fila, int cliente) {
     printf("Caixa %d atendendo cliente %d \n", fila, cliente);
+    sleep(1);
 }
 
 int atenderClienteFila(int fila_origem, int fila_atendendo) {
@@ -113,8 +113,8 @@ int atenderClienteFila(int fila_origem, int fila_atendendo) {
         sem_post(&sem_fila[fila_origem]);
 
         pthread_mutex_unlock(&mutex);
-
         sem_wait(&sem_cliente[fila_origem]);
+
         if (fila_origem != fila_atendendo) {
             printf("Cliente %d saiu do caixa %d para o caixa %d.\n",
                    cliente, fila_origem, fila_atendendo);
@@ -133,47 +133,51 @@ void atenderTodosClienteFila(int fila) {
 }
 
 void filaVaziaAtenderOutraFila(int fila) {
-    for (int i = 0; i < NUM_FILAS; i++) {
-        if ((fila != i)
-            && (atenderClienteFila(i, fila)))
+    for (int fila_origem = 0; fila_origem < NUM_FILAS; fila_origem++) {
+        if ((fila != fila_origem)
+            && (atenderClienteFila(fila_origem, fila)))
             break;
     }
 }
 
-void bloquearFilaSeTodasEstiveremVazia(int fila) {
-    if (todasFilasVazias()
-        && lojaAberta) {
-        printf("bloqueando fila %d vazia. \n", fila);
-        sem_wait(&sem_cliente[fila]);
-    }
-}
-
-void desbloquearTodosFilas() {
+void desbloquearTodasFilas() {
     for (int i = 0; i < NUM_FILAS; i++) {
         sem_post(&sem_cliente[i]);
     }
 }
 
-int continuarAtendendo() {
-    return lojaAberta || !todasFilasVazias();
+void bloquearFila(int fila) {
+    printf("bloqueando fila %d vazia. \n", fila);
+    sem_wait(&sem_cliente[fila]);
 }
 
 void atendimentoFila(int fila) {
-    while (continuarAtendendo()) {
+    while (true) {
         atenderTodosClienteFila(fila);
         filaVaziaAtenderOutraFila(fila);
-        bloquearFilaSeTodasEstiveremVazia(fila);
+        /*
+         * Se todas filas estiverem vazias deveria bloquear,
+         * porem  no nosso caso devemos parar a thread
+         */
+        if (todasFilasVazias()) {
+            if (clientes_restantes <= 0){
+                desbloquearTodasFilas();
+                break;
+            }
+
+            bloquearFila(fila);
+        }
     }
 }
 
-void *threadNovosCliente(void *args) {
+void *threadNovosCliente(void *id) {
+    int _id = (int) id;
     for (int i = 0; i < NUM_CLIENTES_POR_THREAD; i++)
         novoCliente();
 
-    if (pthread_barrier_wait(&barrier) != 0) {
-        lojaAberta = false;
-        if (todasFilasVazias())
-            desbloquearTodosFilas();
+    if (clientes_restantes <= 0) {
+        desbloquearTodasFilas();
+        printf("Todos clientes devidamente enfileirados.\n\n");
     }
 
     pthread_exit(NULL);
@@ -195,8 +199,12 @@ int main() {
 
     inicializar();
 
+    printf("Total de clientes: \t%d\n", NUM_THREADS_CLIENTE * NUM_CLIENTES_POR_THREAD);
+    printf("Total de caixas: \t%d\n\n", NUM_FILAS);
+
+
     for (i = 0; i < NUM_THREADS_CLIENTE; i++)
-        if (pthread_create(&tclientes[i], NULL, &threadNovosCliente, NULL)) {
+        if (pthread_create(&tclientes[i], NULL, &threadNovosCliente, (void *) i)) {
             printf("Erro na criacao da thread.");
         };
 
@@ -209,7 +217,11 @@ int main() {
         pthread_join(tfila[i], NULL);
     }
 
+    printf("Todos clientes devidamente atendidos.\n\n");
+
     finalizar();
+
+    return 0;
 }
 
 
