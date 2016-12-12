@@ -1,0 +1,3 @@
+#!/bin/bash
+(time ./sequencial) &> resultados_sequencial 
+(time ./memoria_compartilhada) &> resultados_memoria_compartilhada
