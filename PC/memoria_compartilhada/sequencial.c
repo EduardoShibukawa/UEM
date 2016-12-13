@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define NUM_FILAS 21
-#define NUM_CLIENTES 400
+#define NUM_FILAS 5
+#define NUM_CLIENTES 100000
 
 int clientes[NUM_CLIENTES];
 int tamanhoFila[NUM_FILAS];
@@ -44,8 +44,7 @@ int gerarIdCliente()
 /// <param name="idFilaAtendido" type="int">Identificador da fila no qual o cliente foi atendido.</param>
 void atenderCliente(int idClienteAtendido, int idFilaAtendido)
 {
-    printf("Cliente %0*d atendido no caixa %0*d.\n", quantidadeZeros, idClienteAtendido, quantidadeZeros, idFilaAtendido);
-    sleep(1);
+    printf("Cliente %0*d recebendo atendimento no caixa %0*d.\n", quantidadeZeros, idClienteAtendido, quantidadeZeros, idFilaAtendido);
 }
 
 /// <summary>
@@ -100,28 +99,24 @@ int inserirCliente(int idCliente)
 /// <summary>
 /// Ŕealiza o atendimento da fila desejada.
 /// </summary>
-/// <param name="idFilaAtendida" type="int">Identificador da fila atendida.</param>
+/// <param name="idFila" type="int">Identificador da fila atendida.</param>
 /// <returns>Retorna, um inteiro, se a fila foi atendida [1] ou não [0].</returns>
-int realizarAtendimentoFila(int idFilaAtendida)
+int realizarAtendimentoFila(int idFila)
 {
-    if (tamanhoFila[idFilaAtendida] < 1)
-        return false;
-
     int idClienteAtendido = clientes[indiceCliente--];
+    int idFilaAtendida = idFila;
+    if (tamanhoFila[idFila] < 1)
+    {
+        idFilaAtendida = recuperarFilaMaior();
+        if (idFila != idFilaAtendida)
+            printf("Cliente %0*d saiu do caixa %0*d para o caixa %0*d.\n", quantidadeZeros, idClienteAtendido, quantidadeZeros, idFila, quantidadeZeros, idFilaAtendida);
+    }
+
     tamanhoFila[idFilaAtendida]--;
 
     atenderCliente(idClienteAtendido, idFilaAtendida);
 
     return true;
-}
-
-/// <summary>
-/// Realiza o atendimento de todos os clientes da fila
-/// </summary>
-/// <param name="idFilaAtendida" type="int">Identificador da fila atendida.</param>
-void atenderTodosClienteFila(int idFilaAtendida)
-{
-    while (realizarAtendimentoFila(idFilaAtendida));
 }
 
 /// <summary>
@@ -132,8 +127,8 @@ void inicializar()
     srand(time(NULL));
     indiceCliente = -1;
     quantidadeZeros = tamanhoDigito(NUM_FILAS > NUM_CLIENTES ? NUM_FILAS : NUM_CLIENTES);
-    printf("Total de clientes: \t%d\n", NUM_CLIENTES);
-    printf("Total de caixas: \t%d\n\n", NUM_FILAS);
+    printf("Quantidade de clientes: \t%d\n", NUM_CLIENTES);
+    printf("Quantidade de caixas: \t%d\n\n", NUM_FILAS);
 
     int contador;
     for (contador = 0;  contador < NUM_FILAS; contador++)
@@ -168,13 +163,30 @@ void preencherFilas()
 }
 
 /// <summary>
+/// Conta quantas filas estão vazias
+/// </summary>
+/// <returns>Retorna, um inteiro, a quantidade de filas vazias.</returns>
+int quantidadeFilasVazias()
+{
+    int idFila;
+    int contador = 0;
+    for (idFila = 0; idFila < NUM_FILAS; idFila++)
+        if (tamanhoFila[idFila] == 0)
+            contador++;
+
+    return contador;
+}
+
+/// <summary>
 /// Realiza o atendimento de todas os clientes, de todas as filas
 /// </summary>
 void atenderTodasFilas()
 {
-    int contador;
-    for (contador = 0; contador < NUM_FILAS; ++contador)
-        atenderTodosClienteFila(contador);
+    printf("Iniciando atendimento dos caixas.\n");
+    int idFila;
+    while (quantidadeFilasVazias() < NUM_FILAS)
+        for (idFila = 0; idFila < NUM_FILAS; ++idFila)
+            realizarAtendimentoFila(idFila);
 
     printf("Todos clientes devidamente atendidos.\n\n");
 }
