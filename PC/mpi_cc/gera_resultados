@@ -1,0 +1,9 @@
+#!/bin/bash
+echo começando gerar resultados memoria compartilhada
+date
+(time mpirun -n 8 ./supermercado -n 10) &> resultados/resultados_compartilhada_8_processador_10_clientes
+
+echo começando gerar resultados memoria sequencial
+date
+(time ./supermercado_sequencial -n 10 -f 8) &> resultados/resultados_sequencial_10_clientes_8_filas
+
