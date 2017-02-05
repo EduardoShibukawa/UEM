@@ -1,0 +1,10 @@
+Clientes atendidos: 10000.
+Caixas fechados: 3.
+----------------------------.
+Tempo execução: 5.353 s
+ Performance counter stats for 'mpirun -n 4 -hostfile tg_host_1 ./supermercado -n 10000':
+
+    42.889.846.379      instructions:u                                              
+
+       6,016060452 seconds time elapsed
+

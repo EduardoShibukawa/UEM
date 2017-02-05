@@ -1,9 +1,9 @@
 #!/bin/bash
-echo começando gerar resultados memoria compartilhada
-date
-(time mpirun -n 8 ./supermercado -n 10) &> resultados/resultados_compartilhada_8_processador_10_clientes
+NUMERO_CLIENTES=100000
+perf stat -e instructions:u mpirun -n 4 -hostfile tg_host_1 ./tr -c $NUMERO_CLIENTES &> resultados_tr/T_${NUMERO_CLIENTES}_clientes_4_processadores
+perf stat -e instructions:u mpirun -n 8 -hostfile tg_host_2 ./tr -c $NUMERO_CLIENTES &> resultados_tr/T_${NUMERO_CLIENTES}_clientes_8_processadores
+perf stat -e instructions:u mpirun -n 12 -hostfile tg_host_3 ./tr -c $NUMERO_CLIENTES &> resultados_tr/T_${NUMERO_CLIENTES}_clientes_12_processadores
+perf stat -e instructions:u mpirun -n 16 -hostfile tg_host_4 ./tr -c $NUMERO_CLIENTES &> resultados_tr/T_${NUMERO_CLIENTES}_clientes_16_processadores
 
-echo começando gerar resultados memoria sequencial
-date
-(time ./supermercado_sequencial -n 10 -f 8) &> resultados/resultados_sequencial_10_clientes_8_filas
+
 

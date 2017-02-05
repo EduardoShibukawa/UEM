@@ -1,0 +1,11 @@
+----------------------------.
+Clientes atendidos: 10000.
+Caixas fechados: 11.
+----------------------------.
+Tempo execução: 3.287 sCaixa 7 Atendendo Cliente 840.
+
+ Performance counter stats for 'mpirun -n 12 -hostfile tg_host_3 ./supermercado -n 10000':
+
+    22.610.057.390      instructions:u                                              
+
+      49,089226354 seconds time elapsed

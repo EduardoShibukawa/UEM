@@ -1,0 +1,14 @@
+scp tr lin15@192.168.1.30:/teste/
+scp tr lin15@192.168.1.107:/teste/
+scp tr lin15@192.168.1.115:/teste/
+scp tr lin15@192.168.1.126:/teste/
+
+scp tg_host_3 lin15@192.168.1.30:/teste/
+scp tg_host_3 lin15@192.168.1.107:/teste/
+scp tg_host_3 lin15@192.168.1.115:/teste/
+scp tg_host_3 lin15@192.168.1.126:/teste/
+
+
+
+
+

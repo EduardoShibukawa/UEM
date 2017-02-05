@@ -7,12 +7,13 @@
 #include <limits.h>
 
 #define ID_PROCESSO_GERENTE 0
-#define INTERNAL_SLEEP_VALUE INT_MAX
+#define INTERNAL_SLEEP_VALUE 1000000	
 
 void internal_sleep(){
-	int i;
-	for (i = 0; i < INTERNAL_SLEEP_VALUE; i++)
-		;
+	//int i;
+	//int max = (rand() % INTERNAL_SLEEP_VALUE);
+	///if (max < 50000) max = 50000;
+	//for (i = 0; i < max; i++);
 }
 
 
@@ -31,12 +32,12 @@ void gerente_cliente(int numero_clientes, int numero_processadores) {
 
 	for (id_processo = 1; id_processo <= numero_processadores; id_processo++){
 		cliente = gera_cliente();		
-		MPI_Ssend(&cliente, 1, MPI_INT, id_processo, id_processo, MPI_COMM_WORLD);
+		MPI_Send(&cliente, 1, MPI_INT, id_processo, id_processo, MPI_COMM_WORLD);
 		clientes_atendidos++;
 	}
 			
-	while (caixas_fechados < (numero_processadores)){		
-		if (caixas_fechados < (numero_processadores)){
+	while (caixas_fechados < numero_processadores){		
+		if (caixas_fechados < numero_processadores){
 			MPI_Recv(&cliente, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status_processo);					
 			id_processo = status_processo.MPI_SOURCE;    
 			if (cliente != -1){								    			
@@ -44,12 +45,12 @@ void gerente_cliente(int numero_clientes, int numero_processadores) {
 					cliente = gera_cliente();			
 					clientes_atendidos += 1;
 					printf("Cliente %d indo para o caixa %d\n", cliente, id_processo);
-					MPI_Ssend(&cliente, 1, MPI_INT, id_processo, id_processo, MPI_COMM_WORLD);						
+					MPI_Send(&cliente, 1, MPI_INT, id_processo, id_processo, MPI_COMM_WORLD);						
 				}
 				else {				
 					cliente = -1;
 					caixas_fechados += 1;								
-					MPI_Ssend(&cliente, 1, MPI_INT, id_processo, id_processo, MPI_COMM_WORLD);					
+					MPI_Send(&cliente, 1, MPI_INT, id_processo, id_processo, MPI_COMM_WORLD);					
 				}	
 			}
 			else {
@@ -113,11 +114,15 @@ void main(int argc, char* argv[]) {
 	srand(time(NULL));
 	printf("Processo %d começou.\n", id_processo);
 	if (id_processo == 0) {		
+		clock_t start = clock(), diff;
 		printf("----------------------------.\n");			
 		printf("Numero clientes: %d.\n", numero_clientes);						
 		printf("Numero caixas: %d.\n", numero_processadores);						
 		printf("----------------------------.\n");					
 		gerente_cliente(numero_clientes, numero_processadores - 1);
+		diff = clock() - start;
+		int msec = diff * 1000 / CLOCKS_PER_SEC;
+		printf("Tempo execução: %d.%d s", msec/1000, msec%1000);
 	} else {				
 		trabalhador_caixa(id_processo);
 	}
